@@ -122,16 +122,16 @@ class Joi2md {
     if (schema._valids._set.length) {
       row[
         schema._flags.allowOnly ? 'valids' : 'allowed'
-      ] = this.codeList(schema._valids._set, true);
+      ] = helper.codeList(schema._valids._set, true);
     }
 
     if (schema._invalids._set.length) {
-      row.invalids = this.codeList(schema._invalids._set, true);
+      row.invalids = helper.codeList(schema._invalids._set, true);
     }
 
     if (schema._inner.dependencies && schema._inner.dependencies.length) {
       row.dependencies = schema._inner.dependencies.map((dep) => {
-        const peers = this.codeList(dep.peers, false, ', ');
+        const peers = helper.codeList(dep.peers, false, ', ');
         switch (dep.type) {
           case 'and':
             return `If one is present, all are required: ${peers}.}`;
