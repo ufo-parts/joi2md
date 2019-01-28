@@ -5,7 +5,7 @@ const helper = require('./helper');
 
 class Joi2md {
   constructor(data) {
-    this.schema = data || Joi.object().keys();
+    this.setSchema(data || {});
     this.HEADERS = [
       'path',
       'type',
@@ -213,7 +213,7 @@ class Joi2md {
    */
   printMd(rows = this.rows) {
     const data = rows.map((rec, dataI) => {
-      if (dataI === 0 && rec.path === undefined) {
+      if (dataI === 0 && rec.path === undefined && rows.length !== 1) {
         return null;
       }
       return this.printHeaders.map(([k], i) => {
