@@ -5,6 +5,7 @@ const helper = require('./helper');
 
 class Joi2md {
   constructor(data) {
+    this.Joi = Joi;
     this.setSchema(data || {});
     this.HEADERS = [
       'path',
@@ -42,7 +43,22 @@ class Joi2md {
     } else if (!schema.isJoi && Object.prototype.toString.apply(schema) === '[object Object]') {
       this.schema = Joi.object().keys().append(schema);
     } else {
-      throw new Error('schema 类型错误!');
+      throw new Error('joi2md: schema 类型错误!');
+    }
+    return this.schema;
+  }
+
+  /**
+   * schema 追加
+   * @param {*} schema 
+   */
+  concatSchema(schema = {}){
+    if (schema.isJoi && schema._type === 'object') {
+      this.schema = this.schema.concat(schema);
+    } else if (!schema.isJoi && Object.prototype.toString.apply(schema) === '[object Object]') {
+      this.schema = this.schema.append(schema);
+    } else {
+      throw new Error('joi2md: schema 类型错误!');
     }
     return this.schema;
   }
@@ -59,7 +75,7 @@ class Joi2md {
     ['notes', '说明'],
   ]) {
     const { error } = Joi.validate(headers, Joi.array().items());
-    if (error) throw new Error("schema headers must [['a', 'b'],['c', 'd']]");
+    if (error) throw new Error("joi2md: schema headers must [['a', 'b'],['c', 'd']]");
     this.printHeaders = headers;
   }
 
