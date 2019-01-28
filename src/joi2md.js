@@ -50,9 +50,9 @@ class Joi2md {
 
   /**
    * schema 追加
-   * @param {*} schema 
+   * @param {*} schema
    */
-  concatSchema(schema = {}){
+  concatSchema(schema = {}) {
     if (schema.isJoi && schema._type === 'object') {
       this.schema = this.schema.concat(schema);
     } else if (!schema.isJoi && Object.prototype.toString.apply(schema) === '[object Object]') {
@@ -236,7 +236,11 @@ class Joi2md {
         let v;
         switch (k) {
           case 'type':
-            v = `${rec.type}${rec.conforms && rec.conforms.length > 0 ? `(${rec.conforms})` : ''}`;
+            if (rec.type === 'array') {
+              v = rec.type;
+            } else {
+              v = `${rec.type}${rec.conforms && rec.conforms.length > 0 ? `(${rec.conforms})` : ''}`;
+            }
             break;
           case 'presence':
             v = rec.presence === 'required';
