@@ -36,3 +36,19 @@ describe('printMd test', ()=>{
     assert.equal(result, destResult)
   })
 })
+describe('printJson test', ()=>{
+  it('return ok', ()=>{
+    const Jm = new Joi2md();
+    const schema = {
+      a: Joi.object().keys({
+      a1:Joi.string().default('hello world'),
+      a2: Joi.number().default(0),
+      a3: Joi.array().items(Joi.string().valid('ee'), Joi.number(), Joi.date().timestamp()),
+    }), b: Joi.date(),};
+    Jm.setSchema(schema);
+    Jm.transferRows();
+    const result = Jm.printJson();
+    const destResult = `{"a":{"a1":"hello world","a2":0,"a3":["",0,"date"]},"b":"date"}`;
+    assert.equal(JSON.stringify(result), destResult);
+  })
+})

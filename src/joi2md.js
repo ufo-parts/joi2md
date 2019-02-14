@@ -102,7 +102,8 @@ class Joi2md {
     this.rows.push(row);
 
     if ('default' in schema._flags) {
-      row.default = `\`${JSON.stringify(schema._flags.default)}\``;
+      // row.default = `\`${JSON.stringify(schema._flags.default)}\``;
+      row.default = schema._flags.default;
     }
 
     row.presence = schema._flags.presence || settings.presence;
@@ -262,6 +263,49 @@ class Joi2md {
     const table = `${titles}\n\n${data}`;
     this.md = rmdt.reformat(table);
     return this.md;
+  }
+
+  /**
+   * 生成json文件
+   */
+  printJson() {
+    const result = {};
+    const typeTransfer = (obj) => {
+      let res = obj.type;
+      if (obj.default) return obj.default;
+      switch (obj.type) {
+        case 'array':
+          res = [];
+          break;
+        case 'object':
+          res = {};
+          break;
+        case 'number':
+          res = 0;
+          break;
+        case 'string':
+          res = '';
+          break;
+        default:
+          break;
+      }
+      return res;
+    };
+    for (let i = 1; i < this.rows.length; i += 1) {
+      const value = this.rows[i];
+      let temp = result;
+      for (const key of value.path.split('.')) {
+        const splitArr = key.split(' [+');
+        if (splitArr.length > 1) {
+          temp[splitArr[0]].push(typeTransfer(value));
+        } else {
+          temp[key] = temp[key] || typeTransfer(value);
+        }
+
+        temp = temp[key];
+      }
+    }
+    return result;
   }
 }
 
