@@ -1,6 +1,6 @@
 const Joi = require('joi');
 const assert = require('assert');
-const Joi2md = require('../src/joi2md');
+const {Joi2md, } = require('../index');
 const Jm = new Joi2md();
 describe('setSchema test',()=>{
     it('joi not object should throw error', ()=>{
@@ -30,7 +30,6 @@ describe('printMd test', ()=>{
       a:Joi.number().required()
     }
     Jm.setSchema(schema)
-    Jm.transferRows()
     const result = Jm.printMd();
     const destResult = "| 参数名 | 类型     | 必填   | 默认值 | 说明  |\n|-----|--------|------|-----|-----|\n| a   | number | true |     |     |\n";
     assert.equal(result, destResult)
@@ -46,7 +45,6 @@ describe('printJson test', ()=>{
       a3: Joi.array().items(Joi.string().valid('ee'), Joi.number(), Joi.date().timestamp()),
     }), b: Joi.date(),};
     Jm.setSchema(schema);
-    Jm.transferRows();
     const result = Jm.printJson();
     const destResult = `{"a":{"a1":"hello world","a2":0,"a3":["",0,"date"]},"b":"date"}`;
     assert.equal(JSON.stringify(result), destResult);

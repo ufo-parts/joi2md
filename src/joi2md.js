@@ -1,4 +1,5 @@
 const Joi = require('joi');
+const get = require('lodash.get');
 const rmdt = require('reformat-markdown-table');
 
 const helper = require('./helper');
@@ -228,84 +229,81 @@ class Joi2md {
   /**
    * 打印md文件
    */
-  printMd(rows = this.rows) {
-    const data = rows.map((rec, dataI) => {
-      if (dataI === 0 && rec.path === undefined && rows.length !== 1) {
-        return null;
-      }
-      return this.printHeaders.map(([k], i) => {
-        let v;
-        switch (k) {
-          case 'type':
-            if (rec.type === 'array') {
-              v = rec.type;
-            } else {
-              v = `${rec.type}${rec.conforms && rec.conforms.length > 0 ? `(${rec.conforms})` : ''}`;
-            }
-            break;
-          case 'presence':
-            v = rec.presence === 'required';
-            break;
-          default:
-            v = rec[k];
-            break;
+  printMd({ throws = false } = {}) {
+    let md = '';
+    try {
+      this.transferRows();
+
+      const data = this.rows.map((rec, dataI) => {
+        if (dataI === 0 && rec.path === undefined && this.rows.length !== 1) {
+          return null;
         }
-        if (v === null || v === undefined) {
-          return i > 0 ? '' : '-';
-        }
-        if (v instanceof Date) {
-          v = v.toISOString();
-        }
-        return String(v).replace(/\|/g, '');
-      }).join('|');
-    }).filter(v => v).join('\n');
-    const titles = this.printHeaders.map(k => k[1]).join('|');
-    const table = `${titles}\n\n${data}`;
-    this.md = rmdt.reformat(table);
-    return this.md;
+        return this.printHeaders.map(([k], i) => {
+          let v;
+          switch (k) {
+            case 'type':
+              if (rec.type === 'array') {
+                v = rec.type;
+              } else {
+                v = `${rec.type}${rec.conforms && rec.conforms.length > 0 ? `(${rec.conforms})` : ''}`;
+              }
+              break;
+            case 'presence':
+              v = rec.presence === 'required';
+              break;
+            default:
+              v = rec[k];
+              break;
+          }
+          if (v === null || v === undefined) {
+            return i > 0 ? '' : '-';
+          }
+          if (v instanceof Date) {
+            v = v.toISOString();
+          }
+          return String(v).replace(/\|/g, '');
+        }).join('|');
+      }).filter(v => v).join('\n');
+      const titles = this.printHeaders.map(k => k[1]).join('|');
+      const table = `${titles}\n\n${data}`;
+      md = rmdt.reformat(table);
+      return md;
+    } catch (e) {
+      if (throws) throw new Error(e);
+      return md;
+    }
   }
 
   /**
    * 生成json文件
    */
-  printJson() {
+  printJson({ throws = false } = {}) {
     const result = {};
-    const typeTransfer = (obj) => {
-      let res = obj.type;
-      if (obj.default) return obj.default;
-      switch (obj.type) {
-        case 'array':
-          res = [];
-          break;
-        case 'object':
-          res = {};
-          break;
-        case 'number':
-          res = 0;
-          break;
-        case 'string':
-          res = '';
-          break;
-        default:
-          break;
-      }
-      return res;
-    };
-    for (let i = 1; i < this.rows.length; i += 1) {
-      const value = this.rows[i];
-      let temp = result;
-      for (const key of value.path.split('.')) {
-        const splitArr = key.split(' [+');
-        if (splitArr.length > 1) {
-          temp[splitArr[0]].push(typeTransfer(value));
-        } else {
-          temp[key] = temp[key] || typeTransfer(value);
-        }
+    try {
+      this.transferRows();
 
-        temp = temp[key];
+      for (let i = 1; i < this.rows.length; i += 1) {
+        const value = this.rows[i];
+        let temp = result;
+        const path = value.path.replace(/ \[\+(\d+) \]\w*/g, (v, index) => `[${index}]`);
+        const lastPathArr = /(?:([\w\W]+)\[(\w+)\])$/.exec(path);
+        const lastPathObj = /(?:([\w\W]+)\.(\w+))$/.exec(path);
+        if (lastPathArr !== null) {
+          temp = get(result, lastPathArr[1], []);
+          temp[lastPathArr[2]] = temp[lastPathArr[2]] || helper.typeTransfer(value);
+        } else if (lastPathObj !== null) {
+          temp = get(result, lastPathObj[1], {});
+          temp[lastPathObj[2]] = temp[lastPathObj[2]] || helper.typeTransfer(value);
+        } else {
+          temp[path] = temp[path] || helper.typeTransfer(value);
+        }
       }
+      console.log(JSON.stringify(result, null, '    '));
+      return result;
+    } catch (e) {
+      if (throws) throw new Error(e);
+      return result;
     }
-    return result;
   }
 }
 

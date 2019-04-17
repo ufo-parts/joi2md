@@ -32,8 +32,30 @@ const mergeObjects = (...args) => {
   }
   return result;
 };
+const typeTransfer = (obj) => {
+  let res = obj.type;
+  if (obj.default) return obj.default;
+  switch (obj.type) {
+    case 'array':
+      res = [];
+      break;
+    case 'object':
+      res = {};
+      break;
+    case 'number':
+      res = 0;
+      break;
+    case 'string':
+      res = '';
+      break;
+    default:
+      break;
+  }
+  return res;
+};
 
 module.exports = {
   codeList,
   mergeObjects,
+  typeTransfer,
 };
