@@ -300,7 +300,6 @@ class Joi2md {
           temp[path] = temp[path] || helper.typeTransfer(value);
         }
       }
-      console.log(JSON.stringify(result, null, '    '));
       return result;
     } catch (e) {
       if (throws) throw new Error(e);
