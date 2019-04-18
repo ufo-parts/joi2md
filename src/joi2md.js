@@ -232,6 +232,7 @@ class Joi2md {
   printMd({ throws = false } = {}) {
     let md = '';
     try {
+      this.rows = [];
       this.transferRows();
 
       const data = this.rows.map((rec, dataI) => {
@@ -280,6 +281,7 @@ class Joi2md {
   printJson({ throws = false } = {}) {
     const result = {};
     try {
+      this.rows = [];
       this.transferRows();
 
       for (let i = 1; i < this.rows.length; i += 1) {
