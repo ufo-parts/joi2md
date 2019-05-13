@@ -1,6 +1,6 @@
 {
   "name": "joi2md",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "main": "index.js",
   "scripts": {
     "lint": "eslint ./",
@@ -13,7 +13,7 @@
   "dependencies": {
     "joi": "^14.3.1",
     "lodash.get": "^4.4.2",
-    "reformat-markdown-table": "^1.1.0"
+    "reformat-markdown-table-cn": "^1.2.0"
   },
   "devDependencies": {
     "eslint": "^5.12.1",

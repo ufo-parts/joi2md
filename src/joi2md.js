@@ -1,6 +1,6 @@
 const Joi = require('joi');
 const get = require('lodash.get');
-const rmdt = require('reformat-markdown-table');
+const rmdt = require('reformat-markdown-table-cn');
 
 const helper = require('./helper');
 
