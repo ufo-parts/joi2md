@@ -1,6 +1,6 @@
 const Joi = require('joi');
 const get = require('lodash.get');
-const rmdt = require('reformat-markdown-table-cn');
+const rmdt = require('./formatTable');
 
 const helper = require('./helper');
 
@@ -30,6 +30,7 @@ class Joi2md {
       ['type', '类型'],
       ['presence', '必填'],
       ['default', '默认值'],
+      ['valids', '可选值'],
       ['notes', '说明'],
     ];
     this.rows = [];
@@ -68,13 +69,7 @@ class Joi2md {
    * 设置schema 打印头
    * @param {*} headers
    */
-  setPrintHeaders(headers = [
-    ['path', '参数名'],
-    ['type', '类型'],
-    ['presence', '必填'],
-    ['default', '默认值'],
-    ['notes', '说明'],
-  ]) {
+  setPrintHeaders(headers = this.printHeaders) {
     const { error } = Joi.validate(headers, Joi.array().items());
     if (error) throw new Error("joi2md: schema headers must [['a', 'b'],['c', 'd']]");
     this.printHeaders = headers;
@@ -93,6 +88,8 @@ class Joi2md {
       type: schema._type,
       description: schema._description,
       unit: schema._unit,
+      valids: [],
+      invalids: [],
       examples: helper.codeList(schema._examples),
       notes: helper.codeList(schema._notes),
       tags: helper.codeList(schema._tags),
@@ -137,14 +134,16 @@ class Joi2md {
       return s;
     }).join(', ');
 
-    if (schema._valids._set.length) {
-      row[
-        schema._flags.allowOnly ? 'valids' : 'allowed'
-      ] = helper.codeList(schema._valids._set, true);
+    if (schema._valids._set.size) {
+      for (const i of schema._valids._set.values()) {
+        if (i !== '') row.valids.push(i);
+      }
     }
 
-    if (schema._invalids._set.length) {
-      row.invalids = helper.codeList(schema._invalids._set, true);
+    if (schema._invalids._set.size) {
+      for (const i of schema._invalids._set.values()) {
+        if (i !== '') row.invalids.push(i);
+      }
     }
 
     if (schema._inner.dependencies && schema._inner.dependencies.length) {
@@ -267,7 +266,7 @@ class Joi2md {
       }).filter(v => v).join('\n');
       const titles = this.printHeaders.map(k => k[1]).join('|');
       const table = `${titles}\n\n${data}`;
-      md = rmdt.reformat(table);
+      md = rmdt(table);
       return md;
     } catch (e) {
       if (throws) throw new Error(e);

@@ -31,7 +31,8 @@ describe('printMd test', ()=>{
     }
     Jm.setSchema(schema)
     const result = Jm.printMd();
-    const destResult = "| 参数名 | 类型   | 必填 | 默认值 | 说明 |\n|--------|--------|------|--------|------|\n| a      | number | true |        |      |\n";
+    console.log(JSON.stringify(result))
+    const destResult = "| 参数名  | 类型    | 必填  | 默认值  | 可选值  | 说明  |\n|--------|--------|------|--------|--------|------|\n| a      | number | true |        |        |      |\n";
     assert.equal(result, destResult)
   })
 })
