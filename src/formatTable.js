@@ -11,13 +11,12 @@ function reformat(str) {
   const max_length_per_column = utils.getMaxLengthPerColumn(table);
 
   return `${table.map((row, row_index) => `|${row.map((cell, column_index) => {
-    let column_length = max_length_per_column[column_index];
-    if (row_index === 0) { column_length += 1; } // 中文header
+    const column_length = max_length_per_column[column_index];
     if (row_index === 1) {
       return utils.padHeaderSeparatorString(cell, column_length + 2);
     }
     return ` ${utils.padStringWithAlignment(cell, column_length, alignments[column_index])} `;
-  }).join('|')}|`).join('\n')}\n`;
+  }).join('|')}|`).join('\n')}`;
 }
 
 
